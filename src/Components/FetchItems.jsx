@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { itemActions } from "../store/itemSlice";
 import { fetchStatusActions } from "../store/fetchStatusSlice";
+import itemsData from "../../data/items.json";
 
 const FetchItems = () => {
   const fetchStatus = useSelector((store) => store.fetchStatus);
@@ -10,21 +11,13 @@ const FetchItems = () => {
   useEffect(() => {
     if (fetchStatus.fetchDone) return;
 
-    const controller = new AbortController();
-    const signal = controller.signal;
-
     dispatch(fetchStatusActions.markFetchingStarted());
-    fetch("../../data/items.json", { signal })
-      .then((res) => res.json())
-      .then(({ items }) => {
-        dispatch(fetchStatusActions.markFetchDone());
-        dispatch(fetchStatusActions.markFetchingFinished());
-        dispatch(itemActions.addInitialItems(items[0]));
-      });
+    const items = itemsData && itemsData.items ? itemsData.items[0] : [];
+    dispatch(itemActions.addInitialItems(items));
+    dispatch(fetchStatusActions.markFetchDone());
+    dispatch(fetchStatusActions.markFetchingFinished());
 
-    return () => {
-      controller.abort();
-    };
+    return;
   }, [fetchStatus]);
 
   return <></>;
